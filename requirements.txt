@@ -1,0 +1,8 @@
+pandas
+numpy
+selenium
+webdriver-manager
+openpyxl
+lxml
+beautifulsoup4
+html5lib
