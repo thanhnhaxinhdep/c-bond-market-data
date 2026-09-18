@@ -424,8 +424,12 @@ tbody td{padding:9px 12px;white-space:nowrap;color:#cbd5e1}
     <h1>&#127970; HNX Bond Market Dashboard</h1>
     <div class="subtitle">Vietnam Corporate Bond Data — Hanoi Stock Exchange (HNX)</div>
   </div>
-  <div class="updated">Data: ''' + today_str + '''</div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <button id="update-btn" onclick="requestUpdate()" style="background:#0ea5e9;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;">&#128260; Update now</button>
+    <div class="updated">Data: ''' + today_str + '''</div>
+  </div>
 </header>
+<div id="update-msg" style="text-align:right;font-size:12px;color:#94a3b8;padding:4px 24px 0 0;"></div>
 <div class="container">
   <div class="kpi-row" id="pp-kpis"></div>
   <div class="filters">
@@ -645,6 +649,19 @@ function updateCharts(){
   document.getElementById('pp-chart-monthly').addEventListener('mouseleave',()=>ttEl.style.display='none');
 }
 initFilters();renderKPIs();renderTable();updateCharts();
+
+const TRIGGER_URL='https://bond-dashboard-trigger.trigger-worker.workers.dev';
+function requestUpdate(){
+  const btn=document.getElementById('update-btn'), msg=document.getElementById('update-msg');
+  btn.disabled=true;
+  msg.textContent='Requesting update...';
+  fetch(TRIGGER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({site:'c-bond-market-data'})})
+    .then(r=>r.json()).then(r=>{
+      if(r.ok){ msg.textContent='Update triggered — fresh data in a few minutes, reload to see it.'; }
+      else { msg.textContent='Could not trigger update ('+(r.reason||'error')+').'; btn.disabled=false; }
+    })
+    .catch(()=>{ msg.textContent='Could not reach the update service.'; btn.disabled=false; });
+}
 </script>
 </body>
 </html>'''
